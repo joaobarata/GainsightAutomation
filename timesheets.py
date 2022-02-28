@@ -74,7 +74,7 @@ def logItem(string, subject, date, meetingtime, meetingtype, hours, notes):
     #Add Date
     driver.find_element(By.XPATH,"//input[@placeholder='Select date']").click()
     driver.find_element(By.CLASS_NAME,'ant-calendar-input').clear()
-    driver.find_element(By.CLASS_NAME,'ant-calendar-input').send_keys(date)
+    driver.find_element(By.CLASS_NAME,'ant-calendar-input').send_keys('{d.month}/{d.day}/{d.year}'.format(d=date))
     driver.find_element(By.XPATH,"//div[@aria-selected='true']").click()
     #Add Time
     driver.find_element(By.XPATH,"//input[@aria-label='time-picker-field activityDate']").clear()
