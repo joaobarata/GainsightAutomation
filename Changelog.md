@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.2] - 2022-03-15
+
+### Fixed
+
+-Fixed an issue related with the UI element changes on the Azure login page
+-Fixed an issue related with the incorrect parsing of dates from the excel file
+
+### Changed
+-Improved the logic on click elements to wait for them to be clicable before trying to click
+-Refactored the selectors to dedicated variables in order to reduce redundancy
+
 ## [0.1.1] - 2022-02-28
 
 ### Fixed
