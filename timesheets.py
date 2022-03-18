@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 from dotenv import load_dotenv
 
 import os
@@ -16,10 +17,16 @@ PASS = os.getenv('PASS')
 TIMELINE_URL = os.getenv('TIMELINE_URL')
 GAINSIGHT_URL = os.getenv('GAINSIGHT_URL')
 
-if None in (EMAIL, PASS, TIMELINE_URL, GAINSIGHT_URL ):
-    print('Please create a .env file with your account credentials on the same folder as the python script')
+SETTINGS = (EMAIL ,PASS ,TIMELINE_URL ,GAINSIGHT_URL )
+PARAMS = ('EMAIL' ,'PASS' ,'TIMELINE_URL' ,'GAINSIGHT_URL')
+
+try:
+    pos = SETTINGS.index(None)
+    print('Please make sure you have a .env file with the a value for the propery ' + PARAMS[pos] +' on the same folder as the python script')
     input('Press return to exit.')
     exit()
+except ValueError:
+    None
 
 if not os.path.isfile('./Gainsight_Log.xlsx'):
     print('Please create a Gainsight_Log.xlsx file on the same folder as the python script')
@@ -27,7 +34,8 @@ if not os.path.isfile('./Gainsight_Log.xlsx'):
     exit()
 
 # Login Selectors
-login_Username_Inp = (By.NAME, "loginfmt")
+
+login_Username_Inp = (By.CSS_SELECTOR,'Input[name="loginfmt"]')
 login_Btn = (By.CSS_SELECTOR,'.button_primary.button')
 login_Pass_Inp = (By.NAME, "passwd")
 login_BtnNext = (By.CSS_SELECTOR,'Input[type="submit"]')
@@ -71,18 +79,16 @@ driver = webdriver.Chrome(service=chrome_service, options=options)
 #Load the Gainsight timeline URL
 driver.get(TIMELINE_URL)
 
-wait = WebDriverWait(driver, 20)
+wait = WebDriverWait(driver, 20, 1)
 
 #Wait for form and then enter the username
-wait.until(EC.presence_of_element_located(login_Username_Inp)).send_keys(EMAIL)
-wait.until(EC.element_to_be_clickable(login_Btn)).click()
+wait.until(EC.element_to_be_clickable(login_Username_Inp)).send_keys(EMAIL, Keys.RETURN)
 
 #Wait for form and then enter the password
-wait.until(EC.presence_of_element_located(login_Pass_Inp)).send_keys(PASS)
-wait.until(EC.element_to_be_clickable(login_BtnNext)).click()
+wait.until(EC.element_to_be_clickable(login_Pass_Inp)).send_keys(PASS, Keys.RETURN)
 
 print("\nWaiting for 2FA confirmation\n")
-longwait = WebDriverWait(driver, 120)
+longwait = WebDriverWait(driver, 120,1)
 
 #Wait for the Timeline page to load
 longwait.until(EC.frame_to_be_available_and_switch_to_it(gainsight_iframe))
@@ -148,3 +154,6 @@ for ind in df.index:
 
 os.unsetenv('EMAIL')
 os.unsetenv('PASS')
+
+input('All entries added, press return to exit.')
+exit()
