@@ -30,6 +30,7 @@ if not os.path.isfile('./Gainsight_Log.xlsx'):
 login_Username_Inp = (By.NAME, "loginfmt")
 login_Btn = (By.CSS_SELECTOR,'.button_primary.button')
 login_Pass_Inp = (By.NAME, "passwd")
+login_BtnNext = (By.CSS_SELECTOR,'Input[type="submit"]')
 
 gainsight_iframe = (By.CSS_SELECTOR ,'iframe[src^="'+GAINSIGHT_URL+'"]')
 
@@ -78,7 +79,7 @@ wait.until(EC.element_to_be_clickable(login_Btn)).click()
 
 #Wait for form and then enter the password
 wait.until(EC.presence_of_element_located(login_Pass_Inp)).send_keys(PASS)
-wait.until(EC.element_to_be_clickable(login_Btn)).click()
+wait.until(EC.element_to_be_clickable(login_BtnNext)).click()
 
 print("\nWaiting for 2FA confirmation\n")
 longwait = WebDriverWait(driver, 120)
