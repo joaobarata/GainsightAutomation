@@ -9,13 +9,23 @@ from dotenv import load_dotenv
 
 import os
 import pandas as pd
+import sys
 
 #Load dotenv file ( .env file needs to be placed at the same level as the python script)
-load_dotenv()
-EMAIL = os.getenv('EMAIL')
-PASS = os.getenv('PASS')
-TIMELINE_URL = os.getenv('TIMELINE_URL')
-GAINSIGHT_URL = os.getenv('GAINSIGHT_URL')
+
+if len(sys.argv)==6:
+    EMAIL =sys.argv[1]
+    PASS = sys.argv[2]
+    TIMELINE_URL = sys.argv[3]
+    GAINSIGHT_URL = sys.argv[4]
+    ACTIVITY_TYPE = sys.argv[5]
+else:
+    load_dotenv()
+    EMAIL = os.getenv('EMAIL')
+    PASS = os.getenv('PASS')
+    TIMELINE_URL = os.getenv('TIMELINE_URL')
+    GAINSIGHT_URL = os.getenv('GAINSIGHT_URL')
+    ACTIVITY_TYPE = 'TSM Update'
 
 SETTINGS = (EMAIL ,PASS ,TIMELINE_URL ,GAINSIGHT_URL )
 PARAMS = ('EMAIL' ,'PASS' ,'TIMELINE_URL' ,'GAINSIGHT_URL')
@@ -44,11 +54,11 @@ gainsight_iframe = (By.CSS_SELECTOR ,'iframe[src^="'+GAINSIGHT_URL+'"]')
 
 # Activity Selectors
 activity_CreateBtn = (By.CLASS_NAME,'gs-add-ant')
-activity_type_dropdown = (By.XPATH,"//li[contains(text(), 'TSM Update')]")
+activity_type_dropdown = (By.XPATH,"//li[contains(text(), '"+ACTIVITY_TYPE+"')]")
 
 #Company Selectors
 company_dropdown = (By.XPATH,"//*[@placeholder='Search Companies and Relationships']")
-company_dropdownItem = (By.XPATH,"/html/body/div[1]/div[5]/div/div/div/div[1]/div[1]/ul/gs-global-search-item/li/a")
+company_dropdownItem = (By.CSS_SELECTOR,"a.gs-global-srch-res")
 
 #Subject
 subject_Inp= (By.XPATH,"//input[@aria-label='subject']")
@@ -67,6 +77,7 @@ notes_iframe=(By.XPATH,"//iframe[@aria-label='rte']")
 notes_input=(By.CLASS_NAME,"gs-rte-container")
 #Add
 activity_save=(By.CLASS_NAME,"gs-nt-save")
+activity_discard=(By.CLASS_NAME,"gs-nt-close")
 
 #Supress webdriver experimental errors
 options = webdriver.ChromeOptions()
@@ -102,7 +113,7 @@ driver.switch_to.frame(0)
 def logItem(string, subject, date, meetingtime, meetingtype, hours, notes):
     wait.until(EC.element_to_be_clickable(activity_CreateBtn)).click()
     driver.find_element(activity_type_dropdown[0],activity_type_dropdown[1]).click()
-    driver.find_elements(company_dropdown[0],company_dropdown[1])[1].send_keys(string)
+    driver.find_element(company_dropdown[0],company_dropdown[1]).send_keys(string)
     
     wait.until(EC.element_to_be_clickable(company_dropdownItem)).click()
     #Add Subject
@@ -120,7 +131,7 @@ def logItem(string, subject, date, meetingtime, meetingtype, hours, notes):
     wait.until(EC.element_to_be_clickable(meeting_dropdown)).click()
     wait.until(EC.presence_of_element_located((By.XPATH,"//li[contains(text(), ' " + meetingtype + "')]"))).click()
     #Hours
-    driver.find_element(hours_inp[0],hours_inp[1]).send_keys(int(hours))
+    driver.find_element(hours_inp[0],hours_inp[1]).send_keys(str(hours))
     #Notes
     driver.switch_to.frame(driver.find_element(notes_iframe[0],notes_iframe[1]))
     driver.find_element(notes_input[0],notes_input[1]).send_keys(notes)
@@ -128,6 +139,7 @@ def logItem(string, subject, date, meetingtime, meetingtype, hours, notes):
     driver.switch_to.frame(0)
     #Add
     wait.until(EC.element_to_be_clickable(activity_save)).click()
+    #wait.until(EC.element_to_be_clickable(activity_discard)).click()
 
 df = pd.read_excel (r'./Gainsight_Log.xlsx')
 df_parsed = df.dropna(subset=['Company','Subject', 'Date', 'Time', 'MeetingType', 'Hours', 'Notes'])
@@ -141,19 +153,20 @@ print (df)
 print()
 
 for ind in df.index:
-     company=df['Company'][ind]
-     subject=df['Subject'][ind]
-     date=pd.to_datetime(df['Date'][ind])
-     meetingtime=df['Time'][ind]
-     meetingtype=df['MeetingType'][ind]
-     hours=df['Hours'][ind]
-     notes=df['Notes'][ind]
-     logItem(company, subject, date, meetingtime, meetingtype, hours, notes)
-     print("Added ", str(hours)+"h", meetingtype, "{d.month}/{d.day}/{d.year}".format(d=date), company)
-     wait.until_not(EC.presence_of_element_located((By.CLASS_NAME,"gs-header-title__context")))
+    company=df['Company'][ind]
+    subject=df['Subject'][ind]
+    date=pd.to_datetime(df['Date'][ind])
+    meetingtime=df['Time'][ind]
+    meetingtype=df['MeetingType'][ind]
+    hours=pd.to_numeric(df['Hours'][ind])
+    notes=df['Notes'][ind]
+    logItem(company, subject, date, meetingtime, meetingtype, hours, notes)
+    print("Added ", str(hours)+"h", meetingtype, "{d.month}/{d.day}/{d.year}".format(d=date), company)
+    wait.until_not(EC.presence_of_element_located((By.CLASS_NAME,"gs-header-title__context")))
 
 os.unsetenv('EMAIL')
 os.unsetenv('PASS')
 
-input('All entries added, press return to exit.')
-exit()
+input('All entries added. Press return to exit.')
+driver.quit()
+sys.exit(0)
