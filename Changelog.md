@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.1.3] - 2023-08-03
+## [0.1.4] - 2023-08-03
 
 ### Fixed
 
 - Fixed the way that the Chrome driver is loaded in order to support Chrome 115.0  
 This will require that the selenium dependency is updated to version 4.11.2+
+- Fixed some errors due to changes in the Gainsight timeline html elements
+
+## [0.1.3] - 2022-03-18
+
+### Fixed
+
 - Fixed some errors due to changes in the Gainsight timeline html elements
 
 ## [0.1.2] - 2022-03-18
